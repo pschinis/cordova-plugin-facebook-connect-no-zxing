@@ -1,22 +1,87 @@
 var exec = require('cordova/exec')
 
-exports.getLoginStatus = function getLoginStatus (s, f) {
-  exec(s, f, 'FacebookConnectPlugin', 'getLoginStatus', [])
+exports.getApplicationId = function (s, f) {
+  exec(s, f, 'FacebookConnectPlugin', 'getApplicationId', [])
 }
 
-exports.showDialog = function showDialog (options, s, f) {
+exports.setApplicationId = function (appId, s, f) {
+  exec(s, f, 'FacebookConnectPlugin', 'setApplicationId', [appId])
+}
+
+exports.getApplicationName = function (s, f) {
+  exec(s, f, 'FacebookConnectPlugin', 'getApplicationName', [])
+}
+
+exports.setApplicationName = function (appName, s, f) {
+  exec(s, f, 'FacebookConnectPlugin', 'setApplicationName', [appName])
+}
+
+exports.getLoginStatus = function (force, s, f) {
+  if (typeof force === 'function') {
+    s = force;
+    f = s;
+    force = false;
+  }
+  exec(s, f, 'FacebookConnectPlugin', 'getLoginStatus', [force])
+}
+
+exports.showDialog = function (options, s, f) {
   exec(s, f, 'FacebookConnectPlugin', 'showDialog', [options])
 }
 
-exports.login = function login (permissions, s, f) {
+exports.login = function (permissions, s, f) {
   exec(s, f, 'FacebookConnectPlugin', 'login', permissions)
 }
 
-exports.checkHasCorrectPermissions = function checkHasCorrectPermissions (permissions, s, f) {
+exports.loginWithLimitedTracking = function (permissions, nonce, s, f) {
+  if (!nonce) {
+    exec(s, f, 'FacebookConnectPlugin', 'loginWithLimitedTracking', [permissions])
+  } else {
+    exec(s, f, 'FacebookConnectPlugin', 'loginWithLimitedTracking', [permissions, nonce])
+  }
+}
+
+exports.checkHasCorrectPermissions = function (permissions, s, f) {
   exec(s, f, 'FacebookConnectPlugin', 'checkHasCorrectPermissions', permissions)
 }
 
-exports.logEvent = function logEvent (name, params, valueToSum, s, f) {
+exports.isDataAccessExpired = function (s, f) {
+  exec(s, f, 'FacebookConnectPlugin', 'isDataAccessExpired', [])
+}
+
+exports.reauthorizeDataAccess = function (s, f) {
+  exec(s, f, 'FacebookConnectPlugin', 'reauthorizeDataAccess', [])
+}
+
+exports.setAutoLogAppEventsEnabled = function (enabled, s, f) {
+  exec(s, f, 'FacebookConnectPlugin', 'setAutoLogAppEventsEnabled', [enabled]);
+}
+
+exports.setAdvertiserIDCollectionEnabled = function (enabled, s, f) {
+  exec(s, f, 'FacebookConnectPlugin', 'setAdvertiserIDCollectionEnabled', [enabled]);
+}
+
+exports.setAdvertiserTrackingEnabled = function (enabled, s, f) {
+  exec(s, f, 'FacebookConnectPlugin', 'setAdvertiserTrackingEnabled', [enabled]);
+}
+
+exports.setDataProcessingOptions = function (options, country, state, s, f) {
+  if (!(country >= 0 && state >= 0)) {
+    exec(s, f, 'FacebookConnectPlugin', 'setDataProcessingOptions', [options]);
+  } else {
+    exec(s, f, 'FacebookConnectPlugin', 'setDataProcessingOptions', [options, country, state]);
+  }
+}
+
+exports.setUserData = function (userData, s, f) {
+  exec(s, f, 'FacebookConnectPlugin', 'setUserData', [userData])
+}
+
+exports.clearUserData = function (s, f) {
+  exec(s, f, 'FacebookConnectPlugin', 'clearUserData', [])
+}
+
+exports.logEvent = function (name, params, valueToSum, s, f) {
   // Prevent NSNulls getting into iOS, messes up our [command.argument count]
   if (!params && !valueToSum) {
     exec(s, f, 'FacebookConnectPlugin', 'logEvent', [name])
@@ -29,21 +94,49 @@ exports.logEvent = function logEvent (name, params, valueToSum, s, f) {
   }
 }
 
-exports.logPurchase = function logPurchase (value, currency, s, f) {
-  exec(s, f, 'FacebookConnectPlugin', 'logPurchase', [value, currency])
+exports.logPurchase = function (value, currency, params, s, f) {
+  if (typeof params === 'function') {
+    s = params;
+    f = s;
+    params = undefined;
+  }
+  if (!params) {
+    exec(s, f, 'FacebookConnectPlugin', 'logPurchase', [value, currency])
+  } else {
+    exec(s, f, 'FacebookConnectPlugin', 'logPurchase', [value, currency, params])
+  }
 }
 
-exports.getAccessToken = function getAccessToken (s, f) {
+exports.getAccessToken = function (s, f) {
   exec(s, f, 'FacebookConnectPlugin', 'getAccessToken', [])
 }
 
-exports.logout = function logout (s, f) {
+exports.logout = function (s, f) {
   exec(s, f, 'FacebookConnectPlugin', 'logout', [])
 }
 
-exports.api = function api (graphPath, permissions, s, f) {
+exports.getCurrentProfile = function (s, f) {
+  exec(s, f, 'FacebookConnectPlugin', 'getCurrentProfile', [])
+}
+
+exports.api = function (graphPath, permissions, httpMethod, s, f) {
   permissions = permissions || []
-  exec(s, f, 'FacebookConnectPlugin', 'graphApi', [graphPath, permissions])
+  if (typeof httpMethod === 'function') {
+    s = httpMethod;
+    f = s;
+    httpMethod = undefined;
+  }
+  if (httpMethod) {
+    httpMethod = httpMethod.toUpperCase();
+    if (httpMethod != 'POST' && httpMethod != 'DELETE') {
+      httpMethod = undefined;
+    }
+  }
+  if (!httpMethod) {
+    exec(s, f, 'FacebookConnectPlugin', 'graphApi', [graphPath, permissions])
+  } else {
+    exec(s, f, 'FacebookConnectPlugin', 'graphApi', [graphPath, permissions, httpMethod])
+  }
 }
 
 exports.getDeferredApplink = function (s, f) {
