@@ -245,19 +245,6 @@ public class ConnectPlugin extends CordovaPlugin {
     }
 
     @Override
-    public void onResume(boolean multitasking) {
-        super.onResume(multitasking);
-        // Developers can observe how frequently users activate their app by logging an app activation event.
-        AppEventsLogger.activateApp(cordova.getActivity().getApplication());
-    }
-
-    @Override
-    public void onPause(boolean multitasking) {
-        super.onPause(multitasking);
-        AppEventsLogger.deactivateApp(cordova.getActivity().getApplication());
-    }
-
-    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
         super.onActivityResult(requestCode, resultCode, intent);
         Log.d(TAG, "activity result in plugin: requestCode(" + requestCode + "), resultCode(" + resultCode + ")");
@@ -364,16 +351,6 @@ public class ConnectPlugin extends CordovaPlugin {
             return true;
         } else if (action.equals("getDeferredApplink")) {
             executeGetDeferredApplink(args, callbackContext);
-            return true;
-        } else if (action.equals("activateApp")) {
-            cordova.getThreadPool().execute(new Runnable() {
-                @Override
-                public void run() {
-                    AppEventsLogger.activateApp(cordova.getActivity().getApplication());
-                    callbackContext.success();
-                }
-            });
-
             return true;
         }
         return false;
